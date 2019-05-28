@@ -1,0 +1,3 @@
+jdbcUrl=jdbc:mysql://localhost:3306/cms?useUnicode=true&amp;characterEncoding=UTF-8
+userName = root
+password = 19960822

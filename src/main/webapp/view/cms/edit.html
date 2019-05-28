@@ -1,0 +1,244 @@
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+
+    <title>文章管理</title>
+   
+    <link rel="stylesheet" href="http://localhost/static/plugins/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="http://localhost/static/css/ztree/metro/ztree.css"  media="all">
+
+  
+    <style>
+        .admin-main{
+            height: 900px;
+        }
+        .mainLeft{
+            float: left;
+        }
+        .mainRight{
+            margin-left: 5%;
+            float: left;
+        }
+        #editor{
+            margin-top:2%;
+            margin-left: 5%;
+            padding:0;
+            width:600px;
+            height:692px;
+        }
+    </style>
+
+</head>
+<body>
+<div class="admin-main">
+    <div class="mainLeft">
+    <form id="articleForm" method="post" class="layui-form" action="">
+           <input value="#(article.id ??)" id="id" name="id" type="hidden" />
+           <input value="#(article.classify_id ??)" id="classify_id" name="classify_id" type="hidden" />
+
+           <div class="layui-form-item" style="margin-top:2%;">
+               <label class="layui-form-label">标题</label>
+               <div class="layui-input-inline">
+                   <input value="#(article.title ??)" id="title" name="title"  lay-verify="required"  autocomplete="off" placeholder="请输入标题" class="layui-input" type="text" />
+               </div>
+           </div>
+        <div class="layui-form-item" style="margin-top:2%;">
+            <label class="layui-form-label">作者</label>
+            <div class="layui-input-inline">
+                <input value="#(article.author ??)" id="author" name="author"  lay-verify="required"  autocomplete="off" placeholder="请输入作者" class="layui-input" type="text" />
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-top:2%;">
+            <label class="layui-form-label">关键字</label>
+            <div class="layui-input-inline">
+                <input value="#(article.keywords ??)" id="keywords" name="keywords"  lay-verify="required"  autocomplete="off" placeholder="请输入关键字" class="layui-input" type="text" />
+            </div>
+        </div>
+
+            <div align="center">
+                <textarea id="editor" name="editor" placeholder="文章内容" >#(article.content ??)</textarea>
+            </div>
+
+    </form>
+</div>
+   
+<div class="mainRight">
+    <div align="center" class="layui-input-block" style="margin: 5% auto">
+        <button class="layui-btn layui-btn-small" align="center" id="edit">保存</button>
+       
+    </div>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>菜单</legend>
+    </fieldset>
+    <ul id="ztree" class="ztree" style="display: inline-block; width: 170px; height: 750px; padding: 10px; border: 1px solid #ddd; overflow: auto;">
+    </ul>
+</div>
+</div>
+</body>
+
+<script src="http://localhost/static/plugins/layui/layui.js"></script>
+
+<script>
+    layui.config({
+        base: 'http://localhost/static/js/'
+    }).use(['form','laydate','upload','ztree'],function () {
+        var $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,upload = layui.upload
+            ,laydate = layui.laydate;
+
+        var setting = {
+            view: {
+//                addHoverDom: addHoverDom,
+//                removeHoverDom: removeHoverDom,
+                selectedMulti: false
+            },
+            check: {
+                enable: true
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            edit: {
+                enable: false
+            },
+            callback: {
+                onCheck:onCheck
+            }
+        };
+
+        var jsonArray= [];
+        var ids ="";
+        function onCheck(e,treeId,treeNode){
+            var treeObj=$.fn.zTree.getZTreeObj("ztree"),
+                nodes=treeObj.getNodes(true);
+            jsonArray=[];
+            for(var i=0;i<nodes.length;i++){
+                jsonArray.push(nodes[i]);
+            }
+            console.log(JSON.stringify(jsonArray));
+        }
+
+        /**
+         * 获取自动赋值选中节点的值
+         * */
+        function getCheck() {
+            var treeObj=$.fn.zTree.getZTreeObj("ztree");
+            console.log(treeObj);
+            var nodes=treeObj.getCheckedNodes(true);
+            ids = "";
+            for(var i=0;i<nodes.length;i++){
+                //debugger;
+                if (nodes[i].isParent!=true){
+                    ids+=nodes[i].id+",";
+                }
+            }
+        }
+
+        $(document).ready(function() {
+            var list_url = "http://localhost/classify/article_ztree_list";
+            $.ajax({
+                type:'post',
+                url:list_url,
+                success:function (response) {
+                    $.fn.zTree.init($("#ztree"), setting, response);
+                    getztree_checked();
+                }
+            })
+
+        });
+
+
+        /**
+         *
+         * 获取文章对应的树形菜单
+         * */
+        function getztree_checked() {
+            var classify_id = $("#classify_id").val();
+            if (classify_id != null && classify_id != "") {
+                var url = "/classify/searchClassifyById?cid="+classify_id;
+                $.ajax({
+                    type: 'post',
+                    url: url,
+                    success: function (response) {
+                        console.log("response"+response);
+                        set_checked(response);//设置树形菜单选中
+                    },
+                    error: function (response) {
+                        parent.layer.alert("获取选中菜单错误！");
+                    }
+                })
+            }
+            return false;
+        }
+
+        /**
+         *
+         * 设置选中
+         * */
+        function set_checked(response) {
+           var treeObj=$.fn.zTree.getZTreeObj("ztree");
+            //遍历每一个节点然后动态更新nocheck属性值
+            var json=eval(response); //数组
+            $.each(json,function (j) {
+                var node = treeObj.getNodeByParam("id", json[j].id, null);
+                if(node!=null){
+                    treeObj.checkNode(node, true, true);//checkbox打钩选中效果
+                    treeObj.selectNode(node, true, true);//鼠标选中效果
+                    treeObj.expandNode(node, true, false);//指定选中ID节点展开
+                }
+            })
+        }
+
+
+        $("#edit").on('click',function(){
+            var url="/article/saveOrUpdate";
+            var id=$("#id").val();
+            getCheck();
+            console.log(ids)
+            if(ids.length > 0) {
+                $.ajax({
+                    type: 'post',
+                    async: false,//同步请求，执行成功后才会继续执行后面的代码
+                    url: url,
+                    data: {
+                        classify_id:ids[0],
+                        id: id,
+                        title: $("#title").val(),
+                        keywords: $("#keywords").val(),
+                        author: $("#author").val(),
+                        source_url: $("#source_url").val(),
+                        content: $("#editor").val()
+                    },
+                    success: function (response) {
+                        parent.layer.alert(response.msg);
+                        window.location.reload();
+                    },
+                    error: function (response) {
+                        parent.layer.alert(response.msg);
+                        window.location.reload();
+                    }
+                });
+            }
+            else
+            {
+                parent.layer.alert("请选择栏目再保存！");
+            }
+            return false;
+        });
+
+    })
+
+</script>
+</html>

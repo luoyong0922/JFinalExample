@@ -1,0 +1,65 @@
+[{
+    "id": "1",
+    "title": "基本元素",
+    "icon": "fa-cubes",
+    "spread": true,
+    "children": [{
+        "id": "1",
+        "title": "员工管理",
+        "icon": "&#xe6c6;",
+        "url": "views/admin/staff/list.jsp"
+    }, {
+        "id": "2",
+        "title": "角色管理",
+        "icon": "&#xe63c;",
+        "url": "views/admin/role/list.jsp"
+    }, {
+        "id": "11",
+        "title": "菜单管理",
+        "icon": "&#xe658;",
+        "url": "views/admin/menu/list.jsp"
+    }, {
+        "id": "3",
+        "title": "注册用户",
+        "icon": "&#xe63c;",
+        "url": "views/admin/user/list.jsp"
+    }]
+}, {
+    "id": "2",
+    "title": "系统维护",
+    "icon": "fa-cogs",
+    "spread": false,
+    "children": [{
+        "id": "12",
+        "title": "栏目维护",
+        "icon": "fa-table",
+        "url": "views/cms/channel/list.jsp"
+    }, {
+        "id": "13",
+        "title": "站点维护",
+        "icon": "&#xe658;",
+        "url": "views/cms/site/list.jsp"
+    }, {
+        "id": "14",
+        "title": "模板维护",
+        "icon": "&#xe658;",
+        "url": "app.html"
+    }]
+}, {
+    "id": "4",
+    "title": "网站管理",
+    "icon": "fa-address-book",
+    "url": "",
+    "spread": false,
+    "children": [{
+        "id": "17",
+        "title": "文档管理",
+        "icon": "fa-github",
+        "url": "views/cms/article/list.jsp"
+    },  {
+        "id": "19",
+        "title": "链接管理",
+        "icon": "&#xe609;",
+        "url": "views/cms/link/list.jsp"
+    }]
+}]
