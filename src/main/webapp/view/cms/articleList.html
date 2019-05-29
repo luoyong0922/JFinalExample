@@ -2,12 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>文章管理</title>
+    <title>layui</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="./static/plugins/layui/css/layui.css"  media="all">
     <link rel="stylesheet" href="./static/css/ztree/metro/ztree.css"  media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
     <style>
         .mainLeft{
             float: left;
@@ -32,9 +33,11 @@
             <i class="layui-icon">&#xe615;</i>搜索
         </button>
 
-        <button class="layui-btn" id="add">
-            <i class="layui-icon">&#xe608;</i>添加
-        </button>
+            <button class="layui-btn" id="add">
+                <i class="layui-icon">&#xe608;</i>添加
+            </button>
+
+
     </div>
 </div>
 <!-- 树形结构 -->
@@ -42,6 +45,7 @@
     <input id="cid" name="cid"  autocomplete="off"  class="layui-input" type="hidden"/>
     <ul id="ztree" class="ztree" style="margin-top:0; width:160px;"></ul>
 </div>
+
 
 <div class="mainRight">
     <div class="layui-form">
@@ -103,7 +107,6 @@
                 content: '/article/toAddArticle',
                 area : ['950px','520px'],
                 success: function(layero, index) {
-
                 },
                 end : function () {
                     table.reload("tablelist");
@@ -111,7 +114,6 @@
             });
             layer.full(index);
         });
-
 
         //过滤查询
         $("#search").on('click',function () {
@@ -124,7 +126,6 @@
                   }
             });
         });
-
 
         //编辑操作
         edit = function (article_pk){
@@ -144,7 +145,6 @@
             });
             layer.full(index);
         };
-
 
         //删除记录
         article_delete = function (data) {
@@ -192,9 +192,6 @@
                 enable: false
             },
             callback: {
-//                onClick: function(e, treeId, treeNode) {
-//                    console.log(treeNode);
-//                }
                 onClick:function(event, treeId, treeNode){
                     onCheck(treeNode);
                 }
@@ -220,12 +217,9 @@
                     $.fn.zTree.init($("#ztree"), setting, response);
                 }
             })
-
         });
-
     });
 </script>
-
 
 </body>
 </html>

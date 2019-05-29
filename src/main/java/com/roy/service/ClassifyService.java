@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ClassifyService {
     /**
-     * 根据父菜单id获取子菜单
+     * 根据id获取子菜单
      * @param classify
      * @return
      */
@@ -40,4 +40,18 @@ public class ClassifyService {
         return list;
     }
 
+    public List<Classify> findClassifyByNameAndPid(String name, Long pid) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("select * from cms_classify where 1=1 ");
+        if (name != null && !name.equals(""))
+        {
+            stringBuffer.append("and name = "+ "'" + name + "'");
+        }
+        if (pid != null)
+        {
+            stringBuffer.append(" and pid = "+pid);
+        }
+        List<Classify> list = Classify.dao.find(stringBuffer.toString());
+        return list;
+    }
 }

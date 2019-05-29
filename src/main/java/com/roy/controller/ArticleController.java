@@ -1,8 +1,6 @@
 package com.roy.controller;
 
 import com.jfinal.core.Controller;
-import com.jfinal.core.paragetter.Para;
-import com.jfinal.json.JFinalJson;
 import com.roy.model.AjaxMsg;
 import com.roy.model.Article;
 import com.roy.service.ArticleService;
@@ -17,6 +15,9 @@ import java.util.Map;
 public class ArticleController extends Controller {
     private static ArticleService articleService = new ArticleService();
 
+    public void index(){
+        render("/view/cms/articleList.html");
+    }
     /**
      * 根据类别id查询文章信息
      */
@@ -43,15 +44,19 @@ public class ArticleController extends Controller {
      */
     public void editArticle(){
         Article article = Article.dao.findById(getParaToLong(0));
-        setAttr("article", article).render("/view/cms/edit.html");
+        setAttr("article", article).render("/view/cms/aritcleEdit.html");
     }
 
     /**
      * 跳转添加文章页面
      */
     public void toAddArticle(){
-        render("/view/cms/edit.html");
+        render("/view/cms/aritcleEdit.html");
     }
+
+    /**
+     * 根据 文章id 删除文章
+     */
     public void deleteArticleById(){
         AjaxMsg ajaxMsg = new AjaxMsg();
         ajaxMsg.setState("fail");
@@ -81,7 +86,7 @@ public class ArticleController extends Controller {
         // 转码  %E6%96%87  -->  文
         String title = URLDecoder.decode(getPara("title").trim(),"UTF-8");
         String condition = "%"+title+"%";
-        List<Article> articles = Article.dao.find("select * from cms_article where title like ? or keywords like ?",condition , condition );
+        List<Article> articles = articleService.findArticleByTitleOrKeywords(condition , condition );
         System.out.println("search article:"+articles);
         Map<String,Object> result = new HashMap<String, Object>();
         result.put("code", 0);
@@ -135,7 +140,7 @@ public class ArticleController extends Controller {
             article.setUpdateTime(new Date());
             res = article.update();
         }else if(article != null &&( article.getId() == null || article.getId().equals("")) ) {
-            int size = Article.dao.find("select id from cms_article where title = ? and author = ?", article.getTitle(), article.getAuthor()).size();
+            int size = articleService.findArticleByTitleAndAuthor( article.getTitle(), article.getAuthor()).size();
             if(size > 0){
                 res = true;
                 ajaxMsg.setMsg("该文章已存在");

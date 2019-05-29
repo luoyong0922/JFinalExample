@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>栏目管理</title>
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css" media="all" />
+    <!-- <link rel="stylesheet" href="css/admin.css"/> -->
+</head>
+<body>
+<div id="app" class="layui-form">
+    <div class="container">
+        <form class="layui-form" action="" id="formlist">
+            <input id="id" name="id" value="#(classify.id ??)"  autocomplete="off"  class="layui-input" type="hidden"/>
+            <input id="p_pid" value="#(classify.pid ??)"  autocomplete="off"  class="layui-input" type="hidden"/>
+            <div class="layui-form-item" style="margin: 5% auto">
+                <label class="layui-form-label">栏目名称</label>
+                <div class="layui-input-block">
+                    <input id="name" name="name" value="#(classify.name ??)"  lay-verify="required"  autocomplete="off" placeholder="请输入栏目名称" class="layui-input" type="text"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">父栏目</label>
+                <div class="layui-input-block">
+                    <select id="pid" name="pid"  lay-verify="required">
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">栏目别名</label>
+                <div class="layui-input-block">
+                    <input id="alias_name" name="alias_name" value="#(classify.alias_name ??)" autocomplete="off" placeholder="请输入栏目别名" class="layui-input" type="text"/>
+                </div>
+            </div>
+
+
+            <div class="layui-form-item">
+                <div align="center" class="layui-input-block" style="margin: 5% auto">
+                    <button class="layui-btn" align="center" onclick="save()">保存</button>
+                    <button class="layui-btn" id="reset" align="center" type="reset">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/plugins/layui/layui.js"></script>
+</body>
+<script>
+    layui.use(['form','jquery'],function () {
+        var $=layui.jquery;
+        var form=layui.form;
+
+        /**
+         * 给下拉菜单绑定值
+         * @type {string}
+         */
+        var url = "/classify/article_ztree_list";
+        $.getJSON(url, function(response) {
+            $("#pid").append("<option value='0' selected=''>无</option>");  //添加一项option
+            console.log(response);
+            var json = eval(response); // 数组
+            $.each(json, function(index, item) {
+                var id = json[index].id;
+                var name = json[index].name;
+                if(id == $("#p_pid").val()){//选中
+                    $("#pid").append("<option value=" + id + " selected>" + name + "</option>"); // 添加一项option
+                }else {
+                    $("#pid").append("<option value=" + id + ">" + name + "</option>"); // 添加一项option
+                }
+            });
+            form.render('select');
+        });
+
+        /**
+         * 保存信息
+         */
+        save = function () {
+            $.ajax({
+                url:"/classify/saveOrUpdate",
+                type:"post",
+                async : false,//同步请求，执行成功后才会继续执行后面的代码
+                data:$('#formlist').serialize(),//form id
+                datatype:"json",
+                success:function(response){
+                    // debugger;
+                    parent.layer.alert(response.msg);
+                },
+                error:function (response) {
+                    parent.layer.alert(response.msg);
+                }
+
+            });
+            return false;
+        }
+
+    })
+</script>
+</html>

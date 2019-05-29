@@ -22,5 +22,10 @@ public class ArticleService {
         return list;
     }
 
-
+    public List<Article> findArticleByTitleAndAuthor(String title, String author){
+       return Article.dao.find("select * from cms_article where title = ? and author = ?",title,author);
+    }
+    public List<Article> findArticleByTitleOrKeywords(String title, String keywords){
+        return Article.dao.find("select * from cms_article where  title like ? or keywords like ?",title,keywords);
+    }
 }

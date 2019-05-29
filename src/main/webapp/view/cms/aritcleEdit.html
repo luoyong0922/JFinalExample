@@ -11,8 +11,8 @@
 
     <title>文章管理</title>
    
-    <link rel="stylesheet" href="http://localhost/static/plugins/layui/css/layui.css" media="all">
-    <link rel="stylesheet" href="http://localhost/static/css/ztree/metro/ztree.css"  media="all">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/static/css/ztree/metro/ztree.css"  media="all">
 
   
     <style>
@@ -83,11 +83,11 @@
 </div>
 </body>
 
-<script src="http://localhost/static/plugins/layui/layui.js"></script>
+<script src="/static/plugins/layui/layui.js"></script>
 
 <script>
     layui.config({
-        base: 'http://localhost/static/js/'
+        base: '/static/js/'
     }).use(['form','laydate','upload','ztree'],function () {
         var $ = layui.jquery;
         var form = layui.form
@@ -147,7 +147,7 @@
         }
 
         $(document).ready(function() {
-            var list_url = "http://localhost/classify/article_ztree_list";
+            var list_url = "/classify/article_ztree_list";
             $.ajax({
                 type:'post',
                 url:list_url,
@@ -172,7 +172,6 @@
                     type: 'post',
                     url: url,
                     success: function (response) {
-                        console.log("response"+response);
                         set_checked(response);//设置树形菜单选中
                     },
                     error: function (response) {
@@ -191,8 +190,9 @@
            var treeObj=$.fn.zTree.getZTreeObj("ztree");
             //遍历每一个节点然后动态更新nocheck属性值
             var json=eval(response); //数组
+            console.log(json)
             $.each(json,function (j) {
-                var node = treeObj.getNodeByParam("id", json[j].id, null);
+                var node = treeObj.getNodeByParam("id", json.id, null);
                 if(node!=null){
                     treeObj.checkNode(node, true, true);//checkbox打钩选中效果
                     treeObj.selectNode(node, true, true);//鼠标选中效果

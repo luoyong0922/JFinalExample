@@ -3,6 +3,7 @@ package com.roy.controller;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
 import com.jfinal.json.JFinalJson;
+import com.roy.model.AjaxMsg;
 import com.roy.model.Article;
 import com.roy.model.Classify;
 import com.roy.model.Ztree;
@@ -19,7 +20,7 @@ public class ClassifyController extends Controller {
     private static ClassifyService classifyService = new ClassifyService();
 
     public void index(){
-        render("/view/cms/articleList.html");
+        render("/view/cms/classifyList.html");
     }
 
     public void addClassify(){
@@ -38,21 +39,30 @@ public class ClassifyController extends Controller {
     }
 
     public void deleteClassifyById(){
+        AjaxMsg ajaxMsg = new AjaxMsg();
+        ajaxMsg.setState("fail");
+        ajaxMsg.setMsg("信息不正确！");
         Long id = getParaToLong(0);
         if(id != null) {
             Classify classify = Classify.dao.findById(id);
             if(classify != null) {
                 // 查询子标题
-                List<Classify> classifies= Classify.dao.find("select count(id) from cms_classify where pid = ?",id);
-                if (classifies.size() > 0) {
-                    System.out.println("请先删除子标题！");
+                List<Article> articles= Article.dao.find("select * from cms_article where classify_id = ?",id);
+                if (articles.size() > 0) {
+                    ajaxMsg.setMsg("请先删除该目录下的文章！");
                 }else{
                     boolean result = Classify.dao.deleteById(id);
-                    System.out.println("delete classify:" + result);
+                    if(result){
+                        ajaxMsg.setState("success");
+                        ajaxMsg.setMsg("删除成功");
+                    }else {
+                        ajaxMsg.setState("fail");
+                        ajaxMsg.setMsg("删除失败");
+                    }
                 }
             }
         }
-        render("/view/common/layout.html");
+        renderJson(ajaxMsg);
     }
 
     public void searchClassifyByName() throws UnsupportedEncodingException {
@@ -64,7 +74,7 @@ public class ClassifyController extends Controller {
     }
 
     public void modifyClassifyById(@Para("classify")Classify classify){
-        if(classify != null) {
+        if(classify != null && classify.getId() != null) {
             classify.setUpdateTime(new Date());
             boolean result = classify.update();
             System.out.println("modify classify:" + result);
@@ -79,16 +89,34 @@ public class ClassifyController extends Controller {
         }
         renderJson(JFinalJson.getJson().toJson(classify));
     }
+
     /**
-     * 获取treegrid数据
+     * 跳转添加目录页面
+     */
+    public void toAddClassify(){
+        render("/view/cms/classifyEdit.html");
+    }
+
+    /**
+     * 弹出编辑页面
+     */
+    public void toEditClassify(){
+        Classify classify = Classify.dao.findById(getParaToLong(0));
+        setAttr("classify", classify).render("/view/cms/classifyEdit.html");
+    }
+
+    /**
+     * 获取treegrid 初始化数据
      */
     public void classifyList(){
 
         Classify classify = new Classify();
         classify.setId(0L);
         List<Classify> classifies = this.tree(classify);
+        System.out.println(classifies);
         renderJson(JFinalJson.getJson().toJson(classifies));
     }
+
 
     /**
      * 使用递归查询树形菜单
@@ -96,6 +124,7 @@ public class ClassifyController extends Controller {
      * @return
      */
     List<Classify> root = new ArrayList<Classify>();
+
     private List<Classify> tree(Classify classify){
 
         Classify tmp_classify;
@@ -108,6 +137,8 @@ public class ClassifyController extends Controller {
                     tmp_classify.setId(classify_parent.getId());
                     tmp_classify.setName(classify_parent.getName());
                     tmp_classify.setPid(classify_parent.getPid());
+                    tmp_classify.setCreateTime(classify_parent.getCreateTime());
+                    tmp_classify.setUpdateTime(classify_parent.getUpdateTime());
 
                     if (tmp_classify.getPid() == 0){//根目录
                         //递归调用之前先添加到全局list
@@ -127,7 +158,6 @@ public class ClassifyController extends Controller {
         return root;
     }
 
-
     /**
      * 文章列表左侧树形菜单
      */
@@ -145,5 +175,37 @@ public class ClassifyController extends Controller {
             ztreelist.add(ztree);
         }
         renderJson(JFinalJson.getJson().toJson(ztreelist));
+    }
+
+    /**
+     * 新增或更新栏目信息
+     */
+    public void saveOrUpdate() {
+        AjaxMsg ajaxMsg = new AjaxMsg();
+        boolean res = false;
+        Classify classify = getModel(Classify.class,"");
+        if (classify != null && classify.getId() != null && !classify.getId().equals("")){//更新
+            classify.setUpdateTime(new Date());
+            res = classify.update();
+        }else if(classify != null &&( classify.getId() == null || classify.getId().equals("")) ) {
+            int size = classifyService.findClassifyByNameAndPid( classify.getName(), classify.getPid()).size();
+            if(size > 0){
+                res = true;
+                ajaxMsg.setMsg("该栏目已存在");
+            }else {
+                classify.setCreateTime(new Date());
+                res = classify.save();
+            }
+        }
+        if(res){
+            ajaxMsg.setState("success");
+            if(ajaxMsg.getMsg() == null || ajaxMsg.getMsg().equals("")) {
+                ajaxMsg.setMsg("保存成功");
+            }
+        }else {
+            ajaxMsg.setState("fail");
+            ajaxMsg.setMsg("保存失败");
+        }
+        renderJson(ajaxMsg);
     }
 }

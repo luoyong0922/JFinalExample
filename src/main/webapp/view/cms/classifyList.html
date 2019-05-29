@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>栏目管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css"  media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+
+<br>
+<div class="layui-form">
+        <div class="layui-form-item layui-form-pane">
+                <button class="layui-btn" id="add" onclick="add()">
+                    <i class="layui-icon">&#xe608;</i>添加
+                </button>
+        </div>
+</div>
+
+<div id="demo">
+</div>
+
+<script src="/static/plugins/layui/layui.js"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+
+    var layout = [
+        { name: '栏目', treeNodes: true, headerClass: 'value_col', colClass: 'value_col', style: 'width: 10%' },
+        { name: '栏目ID',headerClass: 'value_col', colClass: 'value_col', style: 'width: 5%',
+            render: function(row) {
+                return '<div class="layui-table-cell laytable-cell-1-username">'+(typeof(row.id)=="undefined"?'':row.id)+'</div>'; //列渲染
+            }
+        },
+        { name: '父栏目ID',headerClass: 'value_col', colClass: 'value_col', style: 'width: 5%',
+            render: function(row) {
+                return '<div class="layui-table-cell laytable-cell-1-username">'+(typeof(row.pid)=="undefined"?'':row.pid)+'</div>'; //列渲染
+            }
+        },
+        { name: '创建时间',headerClass: 'value_col', colClass: 'value_col', style: 'width: 5%',
+            render: function(row) {
+                return '<div class="layui-table-cell laytable-cell-1-username">'+((typeof(row.create_time)=="null" || row.create_time == null)?'':row.create_time)+'</div>'; //列渲染
+            }
+        },
+        { name: '最近修改时间',headerClass: 'value_col', colClass: 'value_col', style: 'width: 6%',
+            render: function(row) {
+                return '<div class="layui-table-cell laytable-cell-1-username">'+((row.update_time == null || typeof(row.update_time)=="undefined")?'':row.update_time)+'</div>'; //列渲染
+            }
+        },
+        {
+            name: '操作',
+            headerClass: 'value_col',
+            colClass: 'value_col',
+            style: 'width: 20%',
+            render: function(row) {
+                var chil_len=row.children.length;//获取每一级节点的长度
+                var str ='';
+                    str += '<a class="layui-btn layui-btn-xs  layui-btn-normal" onclick="edit(\'' + row.id + '\')"><i class="layui-icon">&#xe642;</i> 编辑</a>'; //列渲染
+
+                if(chil_len==0){//判断是否有子节点
+                    str+='<a class="layui-btn layui-btn-danger layui-btn-xs" onclick="del(\'' + row.id + '\')"><i class="layui-icon">&#xe640;</i> 删除</a>';
+                }
+                return str;
+            }
+        }
+    ];
+
+
+    layui.use(['tree','layer'], function(){
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+    //添加数据
+    add =function () {
+
+      var index=top.layui.layer.open({
+          title: '添加',
+          maxmin: true,
+          type: 2,
+          content: '/classify/toAddClassify',
+          area: ['500px', '550px'],
+    //                offset: 0,
+          scrollbar: false,
+          success: function(layero, index) {
+          },
+          end: function () {
+              location.reload();
+              // inittree();//刷新
+          }
+      });
+    };
+
+    //编辑操作
+    edit = function (id){
+        if (id !=null && id != '') {
+    //                var json = eval(data+']');
+            top.layui.layer.open({
+                title: '编辑',
+                maxmin: true,
+                type: 2,
+                content: '/classify/toEditClassify/'+id,
+                area: ['500px', '550px'],
+                scrollbar: false,
+                success: function (layero, index) {
+                    var body = top.layer.getChildFrame('body', index);
+                    body.find("#id").val(id);
+                },
+                end: function () {
+                    location.reload();
+                    // inittree();//刷新
+                }
+            });
+        }else
+        {
+            layer.alert("请选择需要编辑的数据")
+        }
+    };
+
+
+        //删除记录
+        del = function (data) {
+            var flag = false;
+            layer.confirm("确认删除此数据吗？", {icon: 3, title: '提示'},
+                function (index) {      //确认后执行的操作
+                    $.ajax({
+                        type: 'post',
+                        url: '/classify/deleteClassifyById/'+data,
+                        success: function (response) {
+                            if (response.state == "success") {
+                                layer.close(index);
+                                parent.layer.msg("删除成功");
+                                // inittree();
+                                location.reload();
+                            } else if (response.state == "fail") {
+                                parent.layer.alert(response.msg);
+                            }
+
+                        },
+                        error: function (response) {
+                            layer.close(index);
+                            parent.layer.alert(response.msg);
+                        }
+                    });
+                },
+                function (index) {      //取消后执行的操作
+                    flag = false;
+                });
+        }
+
+    //动态加载树形grid实例
+    inittree = function () {
+            console.log("inittree");
+        $.ajax({
+            type: "post",
+            url: 'classify/classifyList',
+            dataType: 'json',
+            success: function (response) {
+                // console.log(response)
+                $("#demo").html("");
+                //使用该树形菜单时必须有name,id两个字段，否则菜单会乱
+                layui.treeGird({
+                    elem: '#demo',
+                    nodes: response,
+                    layout:layout,
+                    click: function (node, a) {
+                        // console.log(a);
+                    },
+                    success: function () {
+
+                    }
+                });
+            }
+        })
+    }
+
+        $().ready(inittree());
+
+    });
+</script>
+
+
+</body>
+</html>
