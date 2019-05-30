@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>It's a User Page.</h1>
+
+<hr/>
+#set( $foo = "Velocity" )
+Hello $foo World!<br/>
+空值不显示：$!{word} &nbsp; $!{foo}<hr/>
+foreach遍历:
+#foreach ( $item in [1..5] )
+$item
+#end
+<hr/>
+-------------------------------
+#set ( $arr2 = [0..1] )
+#set ( $k = 1 )
+#foreach ( $x in $arr2 )
+x:$x,k: $k
+#set($k = $k+1)
+#end
+-------------------------------
+<hr/>
+## freemarker<br>
+
+## <#assign foo=true/>  值的类型判断： ${foo?string("yes", "no")}<hr/>
+## <#assign temp="FreeMarker"/>  空值不显示：Hello,${temp!} ${te!}  world!<hr/>
+## list遍历：
+## <#list ["星期一", "星期二", "星期三"] + ["星期四", "星期五", "星期六", "星期天"] as x>
+## ${x_index + 1}.${x}<#if x_has_next>,</#if>
+## <#if x="星期四"><#break></#if>
+## </#list>
+<hr/>
+## if判断：
+## <#assign age=23>
+## <#if (age>60)>老年人
+## <#elseif (age>40)>中年人
+## <#elseif (age>20)>青年人
+## <#else> 少年人
+## </#if>
+</body>
+</html>

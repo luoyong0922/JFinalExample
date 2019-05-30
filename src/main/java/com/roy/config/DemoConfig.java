@@ -11,6 +11,7 @@ import com.jfinal.render.ViewType;
 import com.jfinal.server.undertow.UndertowServer;
 import com.jfinal.template.Engine;
 import com.roy.controller.HelloController;
+import com.roy.controller.RenderController;
 import com.roy.model.Article;
 import com.roy.model.Classify;
 import com.roy.routes.AdminRoutes;
@@ -30,14 +31,18 @@ public class DemoConfig extends JFinalConfig {
         PropKit.use("a_little_config.txt");
         me.setDevMode(PropKit.getBoolean("devMode"));
         me.setViewType(ViewType.JFINAL_TEMPLATE);
+        // me.setViewExtension(".html");//freemarker 模板后缀名
+        // me.setViewType(ViewType.FREE_MARKER);
     }
 
     public void configRoute(Routes me) {
         // 如果要将控制器超类中的 public 方法映射为 action 配置成 true，一般不用配置。 该功能属于性能优化，拥有大量路由的大型项目可加快启动速度。该配置如果配置在 "子Routes" 中，将只对该 "子Routes" 有效
         me.setMappingSuperClass(false);
+        me.setBaseViewPath("/view");
         me.add(new FrontRoutes());  // 前端路由
         me.add(new AdminRoutes());  // 后端路由
         me.add("/hello", HelloController.class);
+        me.add("/render", RenderController.class,"/front");
     }
 
     public void configEngine(Engine me) {
