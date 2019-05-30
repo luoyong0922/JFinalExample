@@ -14,7 +14,7 @@ public class AdminRoutes extends Routes {
         // addInterceptor(new AdminInterceptor());
         // add("/admin",AdminController.class);
         //  第三个参数viewPath是指该Controller返回的视图的相对路径(该参数具体细节将在Controller相关章节中给出)。当viewPath未指定时默认值为controllerKey。
-        add("/user",UserController.class);
+        add("/front",UserController.class);
         add("/classify",ClassifyController.class,"/");
         add("/article",ArticleController.class,"/");
     }

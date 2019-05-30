@@ -206,14 +206,14 @@
             var url="/article/saveOrUpdate";
             var id=$("#id").val();
             getCheck();
-            console.log(ids)
+            var cid = ids.replace(/[~,'!<>@#$%^&*()-+_=:]/g, "");
             if(ids.length > 0) {
                 $.ajax({
                     type: 'post',
                     async: false,//同步请求，执行成功后才会继续执行后面的代码
                     url: url,
                     data: {
-                        classify_id:ids[0],
+                        classify_id:cid,
                         id: id,
                         title: $("#title").val(),
                         keywords: $("#keywords").val(),
